@@ -41,7 +41,7 @@ class ExtensionUnitTest {
     @Test
     fun testSearch() = testIn("SearchTest") {
         val searchResult = extension.searchLyrics(
-            query = "Satan in the wait"
+            query = "End of Beginning Djo"
         )
 
         searchResult.loadAll().forEach { p0 ->

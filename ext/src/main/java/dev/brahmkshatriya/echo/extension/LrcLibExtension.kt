@@ -30,7 +30,8 @@ class LrcLibExtension : ExtensionClient, LyricsClient, LyricsSearchClient {
         clientId: String,
         track: Track
     ): PagedData<Lyrics> = PagedData.Single {
-        val url = "$LRC_BASE_URL/api/search?track_name=${track.title}&artist_name=${track.artists.firstOrNull()?.name ?: ""}"
+        val url =
+            "$LRC_BASE_URL/api/search?track_name=${track.title}&artist_name=${track.artists.firstOrNull()?.name ?: ""}"
         resultToLyrics(url)
     }
 
@@ -69,7 +70,12 @@ class LrcLibExtension : ExtensionClient, LyricsClient, LyricsSearchClient {
                 val parts = line.split("] ")
                 if (parts.size == 2) {
                     val time = parts[0].removePrefix("[").split(":").let { (minutes, seconds) ->
-                        minutes.toLong() * 60 * 1000 + (seconds.toDouble() * 1000).toLong()
+                       try {
+                           minutes.toLong() * 60 * 1000 + (seconds.toDouble() * 1000).toLong()
+                       } catch (e: Exception) {
+                           e.printStackTrace()
+                           0
+                       }
                     }
                     if (time in seenTimes) {
                         null
