@@ -69,10 +69,11 @@ class LrcLibExtension : ExtensionClient, LyricsClient, LyricsSearchClient {
             list = lyricsString.lines().mapNotNull { line ->
                 val parts = line.split("] ")
                 if (parts.size == 2) {
-                    val time = parts[0].removePrefix("[").split(":").let { (minutes, seconds) ->
+                    val time = parts[0].replace("[", "").split(":").let { (minutes, seconds) ->
                        try {
                            minutes.toLong() * 60 * 1000 + (seconds.toDouble() * 1000).toLong()
                        } catch (e: Exception) {
+                           println("Current Input: $minutes")
                            e.printStackTrace()
                            0
                        }
