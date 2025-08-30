@@ -4,7 +4,8 @@ import dev.brahmkshatriya.echo.common.clients.ExtensionClient
 import dev.brahmkshatriya.echo.common.clients.LyricsClient
 import dev.brahmkshatriya.echo.common.clients.LyricsSearchClient
 import dev.brahmkshatriya.echo.common.helpers.ContinuationCallback.Companion.await
-import dev.brahmkshatriya.echo.common.helpers.PagedData
+import dev.brahmkshatriya.echo.common.models.Feed
+import dev.brahmkshatriya.echo.common.models.Feed.Companion.toFeed
 import dev.brahmkshatriya.echo.common.models.Lyrics
 import dev.brahmkshatriya.echo.common.models.Track
 import dev.brahmkshatriya.echo.common.settings.Setting
@@ -19,30 +20,26 @@ class LrcLibExtension : ExtensionClient, LyricsClient, LyricsSearchClient {
 
     override suspend fun onExtensionSelected() {}
 
-    override val settingItems: List<Setting> = emptyList()
-
     private lateinit var setting: Settings
+
+    override suspend fun getSettingItems(): List<Setting> = emptyList()
+
     override fun setSettings(settings: Settings) {
         setting = settings
     }
 
-    override fun searchTrackLyrics(
+    override suspend fun searchTrackLyrics(
         clientId: String,
         track: Track
-    ): PagedData<Lyrics> = PagedData.Single {
+    ): Feed<Lyrics> {
         val url =
             "$LRC_BASE_URL/api/search?track_name=${track.title}&artist_name=${track.artists.firstOrNull()?.name ?: ""}"
-        resultToLyrics(url)
+        return resultToLyrics(url)
     }
 
     override suspend fun loadLyrics(lyrics: Lyrics): Lyrics = lyrics
 
-    override fun searchLyrics(query: String): PagedData<Lyrics> = PagedData.Single {
-        val url = "$LRC_BASE_URL/api/search?q=${query}"
-        resultToLyrics(url)
-    }
-
-    private suspend inline fun resultToLyrics(url: String): List<Lyrics> {
+    private suspend inline fun resultToLyrics(url: String): Feed<Lyrics> {
         val request = Request.Builder()
             .url(url)
             .build()
@@ -57,7 +54,7 @@ class LrcLibExtension : ExtensionClient, LyricsClient, LyricsSearchClient {
                 subtitle = dto.artistName,
                 lyrics = parseSyncedLyrics(dto.syncedLyrics) ?: Lyrics.Simple(dto.plainLyrics ?: "")
             )
-        }
+        }.toFeed()
     }
 
     private fun parseSyncedLyrics(lyricsString: String?): Lyrics.Lyric? {
@@ -95,6 +92,11 @@ class LrcLibExtension : ExtensionClient, LyricsClient, LyricsSearchClient {
             },
             fillTimeGaps = true
         )
+    }
+
+    override suspend fun searchLyrics(query: String): Feed<Lyrics> {
+        val url = "$LRC_BASE_URL/api/search?q=${query}"
+        return resultToLyrics(url)
     }
 
     private companion object {

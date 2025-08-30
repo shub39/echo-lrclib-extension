@@ -16,6 +16,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "extension"
+rootProject.name = "Echo Lrclib Extension"
 include(":app")
 include(":ext")
