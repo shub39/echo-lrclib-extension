@@ -90,7 +90,7 @@ class LrcLibExtension : ExtensionClient, LyricsClient, LyricsSearchClient {
                     null
                 }
             },
-            fillTimeGaps = true
+            fillTimeGaps = false
         )
     }
 
